@@ -1,0 +1,35 @@
+// users/users.proto
+syntax = "proto3";
+
+package users;
+
+service UsersService {
+  rpc login (LoginInput) returns (LoginResponse) {}
+  rpc register (RegisterInput) returns (RegisterResponse) {}
+}
+
+
+
+
+message LoginInput {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterInput {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+  string userId = 3;
+  repeated string errors = 4;
+  bool success = 5;
+}
+
+message RegisterResponse {
+  bool success = 1;
+  repeated string errors = 2;
+}

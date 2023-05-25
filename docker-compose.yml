@@ -1,0 +1,79 @@
+version: "3"
+
+services:
+  gateway-svc:
+    container_name: gateway
+    image: gateway:latest
+    build:
+      context: "./gateway"
+      dockerfile: "./Dockerfile"
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    volumes:
+      - ./gateway:/usr/src/app
+      - ./_proto:/usr/src/app/_proto
+    command: npm run start:dev
+    environment:
+        NODE_ENV: "dev"
+        PORT: "3000"
+        USERS_SVC_URL: "users-svc"
+        USERS_SVC_PORT: "50051"
+        GRPC_DNS_RESOLVER: native
+    restart: "on-failure"
+    depends_on:
+      - "users-svc"
+    # volumes:
+      # - ./:/usr/src/app
+    #   - /usr/src/app/node_modules
+  users_db:
+      container_name: users_db
+      image: postgres:14.1-alpine
+      restart: always
+      environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=users_db
+      ports:
+        - '5432'
+      volumes: 
+        - db:/var/lib/postgresql/data  
+      networks:
+      - backend
+  users-svc:
+    container_name: users
+    image: users:latest
+    build:
+      context: "./microservices/users"
+      dockerfile: "./Dockerfile"
+    expose:
+      - "50051"
+    networks:
+      - backend
+    command: npm run start:dev
+    volumes:
+      - ./microservices/users:/usr/src/app
+      - ./_proto:/usr/src/app/_proto
+    environment:
+        NODE_ENV: "dev"
+        PORT: "50051"
+        USERS_SVC_URL: "users-svc"
+        USERS_SVC_PORT: "50051"
+        GRPC_DNS_RESOLVER: native
+        JWT_SECRET: asdjhdsfkjhsdkjfh
+        JWT_REFRESH_SECRET: asjdhaksjhdjakhsdj
+        JWT_EXPIRES_IN: 7d
+    restart: "on-failure"
+    depends_on:
+      - "users_db"
+   
+  
+
+
+networks:
+  backend:
+    driver: bridge
+volumes:
+  db:
+    driver: local
