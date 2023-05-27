@@ -1,4 +1,4 @@
-import { BadRequestException, Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { UserEntity } from './user.entity';
 import { Register } from './interfaces/register.interface';
@@ -9,9 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { VerifyToken } from './interfaces/verify-token.interface';
 
 @Controller('users')
 export class UsersController {
+  private logger = new Logger(UsersController.name);
   constructor(
     private readonly jwtService: JwtService,
     @InjectRepository(UserEntity)
@@ -39,7 +41,7 @@ export class UsersController {
     }
     const payload: JWTPayload = {
       email,
-      userId: user.uuid,
+      userId: user.id,
     };
 
     const accessToken = await this.jwtService.sign(payload);
@@ -51,7 +53,7 @@ export class UsersController {
     return {
       refreshToken,
       accessToken,
-      userId: user.uuid,
+      userId: user.id,
       success: true,
     };
   }
@@ -73,5 +75,25 @@ export class UsersController {
     user.password = hashedPassword;
     await this.userRepo.save(user);
     return { success: true, errors: [] };
+  }
+
+  @GrpcMethod('UsersService', 'verifyToken')
+  async verifyToken({ token }: VerifyToken) {
+    try {
+      const payload: JWTPayload = await this.jwtService.verifyAsync<JWTPayload>(
+        token,
+      );
+      return {
+        errors: [],
+        success: true,
+        payload,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      return {
+        errors: [`Token: ${token} not valid!`],
+        success: false,
+      };
+    }
   }
 }

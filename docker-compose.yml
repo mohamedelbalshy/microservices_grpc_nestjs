@@ -20,10 +20,13 @@ services:
         PORT: "3000"
         USERS_SVC_URL: "users-svc"
         USERS_SVC_PORT: "50051"
+        POSTS_SVC_URL: "posts-svc"
+        POSTS_SVC_PORT: "50051"
         GRPC_DNS_RESOLVER: native
     restart: "on-failure"
     depends_on:
       - "users-svc"
+      - "posts-svc"
     # volumes:
       # - ./:/usr/src/app
     #   - /usr/src/app/node_modules
@@ -68,7 +71,44 @@ services:
     depends_on:
       - "users_db"
    
-  
+  posts_db:
+    container_name: posts_db
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=posts_db
+    ports:
+      - '5432'
+    volumes: 
+      - db:/var/lib/postgresql/data  
+    networks:
+    - backend
+  posts-svc:
+    container_name: posts
+    image: posts:latest
+    build:
+      context: "./microservices/posts"
+      dockerfile: "./Dockerfile"
+    expose:
+      - "50051"
+    networks:
+      - backend
+    command: npm run start:dev
+    volumes:
+      - ./microservices/posts:/usr/src/app
+      - ./_proto:/usr/src/app/_proto
+    environment:
+        NODE_ENV: "dev"
+        PORT: "50051"
+        POSTS_SVC_URL: "posts-svc"
+        POSTS_SVC_PORT: "50051"
+        GRPC_DNS_RESOLVER: native
+    restart: "on-failure"
+    depends_on:
+      - "posts_db"
+   
 
 
 networks:

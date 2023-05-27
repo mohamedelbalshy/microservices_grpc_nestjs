@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    
     "build": "tsc -p tsconfig.build.json ",
     "prestart:prod": "rimraf dist &&  npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

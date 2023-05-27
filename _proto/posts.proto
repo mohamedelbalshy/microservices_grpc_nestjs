@@ -1,0 +1,53 @@
+// _proto/posts.proto
+syntax = "proto3";
+
+package posts;
+
+service PostsService {
+    rpc create(CreatePostInput) returns (PostResponse) {}
+    rpc findOne(FindOrDeleteOnePostInput) returns (PostResponse) {}
+    rpc list (FindManyPostInput) returns (PostListResponse) {}
+    rpc deleteOne(FindOrDeleteOnePostInput) returns (DeletePostResponse) {}
+}
+
+// inputs
+message CreatePostInput {
+    string title = 1;
+    string url=2;
+    string text=3;
+    string userId=4;
+}
+
+message FindOrDeleteOnePostInput {
+    string id = 1;
+    string userId=2;
+}
+
+message FindManyPostInput {
+    string userId = 1;
+}
+
+// response
+message PostResponse {
+    bool success = 1;
+    string id =2;
+    string title=3;
+    string url=4;
+    string text=5;
+    string userId=6;
+    repeated string errors =7;
+}
+
+message PostListResponse {
+    bool success = 1;
+    repeated PostResponse posts=2;
+    repeated string errors =3;
+}
+
+message DeletePostResponse {
+    bool success = 1;
+    repeated string errors = 2; 
+}
+
+
+

@@ -1,10 +1,14 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { UsersServiceI } from './users.interface';
+import {
+  UsersServiceI,
+  VerifyTokenResponse,
+} from './interfaces/users.interface';
 import { LoginDto } from './dto/Login.dto';
 import { RegisterDto } from './dto/Register.dto';
-import { Observable } from 'rxjs';
+import { Observable, lastValueFrom } from 'rxjs';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { VerifyTokenDto } from './dto/verify-token.dto';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -21,5 +25,14 @@ export class UsersService implements OnModuleInit {
 
   register(registerDto: RegisterDto): Observable<any> {
     return this.usersService.register(registerDto);
+  }
+
+  async verifyToken(
+    verifyTokenDto: VerifyTokenDto,
+  ): Promise<VerifyTokenResponse> {
+    const res = await lastValueFrom(
+      this.usersService.verifyToken(verifyTokenDto),
+    );
+    return res;
   }
 }

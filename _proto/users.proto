@@ -6,10 +6,12 @@ package users;
 service UsersService {
   rpc login (LoginInput) returns (LoginResponse) {}
   rpc register (RegisterInput) returns (RegisterResponse) {}
+  rpc verifyToken(VerifyTokenInput) returns (VerifyTokenResponse){}
 }
 
-
-
+message VerifyTokenInput {
+  string token = 1;
+}
 
 message LoginInput {
   string email = 1;
@@ -32,4 +34,14 @@ message LoginResponse {
 message RegisterResponse {
   bool success = 1;
   repeated string errors = 2;
+}
+
+message PayloadResponse {
+  string userId = 1;
+  string email = 2;
+}
+message VerifyTokenResponse {
+  bool success = 1;
+  repeated string errors = 2;
+  PayloadResponse payload = 3;
 }
