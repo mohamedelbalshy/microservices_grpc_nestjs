@@ -1,0 +1,57 @@
+// _proto/comments.proto
+syntax = "proto3";
+
+package comments;
+
+service CommentsService {
+    rpc create(CreateCommentInput) returns (CommentResponse) {}
+    rpc findOne(FindOrDeleteOneCommentInput) returns (CommentResponse) {}
+    rpc findMany(FindManyCommentsInput) returns (CommentListResponse) {}
+    rpc deleteById(FindOrDeleteOneCommentInput) returns (DeleteCommentResponse) {}
+    rpc updateById(UpdateCommentInput) returns (CommentResponse) {}
+}
+
+message CreateCommentInput {
+    string userId = 1;
+    string content = 2;
+    string postId = 3; 
+}
+
+message FindOrDeleteOneCommentInput {
+    string id = 1;
+    string userId=2;
+}
+
+message FindManyCommentsInput {
+    string postId = 1;
+}
+
+message UpdateCommentInput {
+    string id = 1;
+    string userId = 2;
+    string content = 3;
+}
+
+message DeleteCommentResponse {
+    repeated string erros =1;
+    bool success = 2;
+}
+
+message Comment {
+    string userId = 3;
+    string content = 4;
+    string postId = 5;
+    string id = 6;
+}
+
+message CommentResponse {
+    repeated string erros =1;
+    bool success = 2;
+    Comment comment =3 ;
+}
+
+message CommentListResponse {
+    repeated string erros =1;
+    bool success = 2;
+    repeated Comment comments = 3; 
+}

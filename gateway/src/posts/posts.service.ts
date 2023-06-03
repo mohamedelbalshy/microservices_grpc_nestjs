@@ -3,6 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { PostsServiceI } from './interfaces/post.interface';
+import { FindOrDeleteOneDto } from './dto/find-or-delete-one.dto';
 
 @Injectable()
 export class PostsService {
@@ -13,19 +14,27 @@ export class PostsService {
       .create({ ...createPostDto, userId });
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  findAll(userId: string) {
+    return this.client
+      .getService<PostsServiceI>('PostsService')
+      .findMany({ userId });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  findOne(FindOrDeleteOneDto: FindOrDeleteOneDto) {
+    return this.client
+      .getService<PostsServiceI>('PostsService')
+      .findOne(FindOrDeleteOneDto);
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  update(id: string, updatePostDto: UpdatePostDto, userId: string) {
+    return this.client
+      .getService<PostsServiceI>('PostsService')
+      .updateById({ ...updatePostDto, id, userId });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  remove(id: string, userId: string) {
+    return this.client
+      .getService<PostsServiceI>('PostsService')
+      .deleteById({ userId, id });
   }
 }

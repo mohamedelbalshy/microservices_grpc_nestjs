@@ -23,27 +23,33 @@ services:
         POSTS_SVC_URL: "posts-svc"
         POSTS_SVC_PORT: "50051"
         GRPC_DNS_RESOLVER: native
+        COMMENTS_SVC_URL: "comments-svc"
+        COMMENTS_SVC_PORT: "50051"
+        REDIS_HOST: cache
+        REDIS_PORT: 6379
+        REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+
     restart: "on-failure"
     depends_on:
       - "users-svc"
       - "posts-svc"
-    # volumes:
-      # - ./:/usr/src/app
-    #   - /usr/src/app/node_modules
-  users_db:
-      container_name: users_db
-      image: postgres:14.1-alpine
-      restart: always
-      environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
-        - POSTGRES_DB=users_db
-      ports:
-        - '5432'
-      volumes: 
-        - db:/var/lib/postgresql/data  
-      networks:
-      - backend
+      - "comments-svc"
+      
+  db:
+    container_name: db
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - '5432'
+    volumes: 
+      - new_db_volume:/var/lib/postgresql/data  
+    networks:
+    - backend
+
   users-svc:
     container_name: users
     image: users:latest
@@ -69,22 +75,9 @@ services:
         JWT_EXPIRES_IN: 7d
     restart: "on-failure"
     depends_on:
-      - "users_db"
+      - "db"
    
-  posts_db:
-    container_name: posts_db
-    image: postgres:14.1-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=posts_db
-    ports:
-      - '5432'
-    volumes: 
-      - db:/var/lib/postgresql/data  
-    networks:
-    - backend
+  
   posts-svc:
     container_name: posts
     image: posts:latest
@@ -105,15 +98,80 @@ services:
         POSTS_SVC_URL: "posts-svc"
         POSTS_SVC_PORT: "50051"
         GRPC_DNS_RESOLVER: native
+        REDIS_HOST: cache
+        REDIS_PORT: 6379
+        REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     restart: "on-failure"
     depends_on:
-      - "posts_db"
+      - "db"
    
 
+  comments-svc:
+    container_name: comments
+    image: comments:latest
+    build:
+      context: "./microservices/comments"
+      dockerfile: "./Dockerfile"
+    expose:
+      - "50051"
+    networks:
+      - backend
+    command: npm run start:dev
+    volumes:
+      - ./microservices/comments:/usr/src/app
+      - ./_proto:/usr/src/app/_proto
+    environment:
+        NODE_ENV: "dev"
+        PORT: "50051"
+        COMMENTS_SVC_URL: "comments-svc"
+        COMMENTS_SVC_PORT: "50051"
+        GRPC_DNS_RESOLVER: native
+        
+    restart: "on-failure"
+    depends_on:
+      - "db"
 
+  rabbitmq-svc:
+    image: rabbitmq:3.8-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5673:5672
+        - 15673:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - backend
+
+  cache:
+    container_name: cache
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6378:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin4_container
+  #   restart: always
+  #   ports:
+  #     - "5050:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: raj@nola.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
 networks:
   backend:
     driver: bridge
 volumes:
-  db:
+  new_db_volume:
     driver: local
+  cache:
+    driver: local  
+  pgadmin-data:
+    driver: local
+  

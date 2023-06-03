@@ -1,6 +1,5 @@
-gateway/node_modules/
-gateway/dist/
+gateway/*/node_modules
+gateway/*/dist
 
-microservices/*/node_modules/
-microservices/*/dist/
-
+microservices/*/node_modules
+microservices/*/dist

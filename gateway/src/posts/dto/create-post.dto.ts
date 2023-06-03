@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmpty, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto {
-  
   @IsEmpty()
   userId: string;
 

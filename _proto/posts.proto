@@ -6,8 +6,8 @@ package posts;
 service PostsService {
     rpc create(CreatePostInput) returns (PostResponse) {}
     rpc findOne(FindOrDeleteOnePostInput) returns (PostResponse) {}
-    rpc list (FindManyPostInput) returns (PostListResponse) {}
-    rpc deleteOne(FindOrDeleteOnePostInput) returns (DeletePostResponse) {}
+    rpc findMany (FindManyPostInput) returns (PostListResponse) {}
+    rpc deleteById(FindOrDeleteOnePostInput) returns (DeletePostResponse) {}
 }
 
 // inputs
@@ -27,20 +27,24 @@ message FindManyPostInput {
     string userId = 1;
 }
 
+
+message Post {
+    string id =1;
+    string title=2;
+    string url=3;
+    string text=4;
+    string userId=5;
+}
 // response
 message PostResponse {
     bool success = 1;
-    string id =2;
-    string title=3;
-    string url=4;
-    string text=5;
-    string userId=6;
-    repeated string errors =7;
+    repeated string errors =2;
+    Post post = 3;
 }
 
 message PostListResponse {
     bool success = 1;
-    repeated PostResponse posts=2;
+    repeated Post posts=2;
     repeated string errors =3;
 }
 

@@ -12,7 +12,7 @@ import { UserEntity } from './users/user.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: () => ({
-        host: 'users_db',
+        host: 'db',
         type: 'postgres',
         port: 5432,
         username: 'postgres',

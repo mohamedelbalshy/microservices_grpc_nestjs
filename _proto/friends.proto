@@ -1,0 +1,55 @@
+// _proto/friends.proto
+syntax = "proto3";
+
+package friends;
+
+service FriendsService {
+    rpc sendRequest(SendRequestInput) returns (FriendRequestResponse) {}
+    rpc acceptRequest(AcceptRequestInput) returns (FriendRequestResponse) {}
+    rpc unfriend(UnfriendInput) returns (FriendRequestResponse) {}
+    rpc findManyFriends(FindManyFriendsInput) returns (FindManyFriendsResponse) {}
+}
+
+message SendRequestInput {
+    string me = 1;
+    string userId = 2;
+}
+
+message AcceptRequestInput {
+    string me = 1;
+    string userId = 2;
+}
+
+message UnfriendInput {
+    string me = 1;
+    string userId = 2;
+}
+
+message FindManyFriendsInput {
+    string me = 1;
+}
+
+
+message FriendRequest {
+
+    enum RequestStatus {
+        REQUESTED = 0;
+        ACCEPTED = 1;
+    }
+    
+    string sender = 1;
+    string receiver = 2;
+    RequestStatus status = 3;
+}
+
+message FriendRequestResponse {
+    FriendRequest friendRequest = 1;
+    repeated string errors = 2;
+    bool success = 3; 
+}
+
+message FindManyFriendsResponse {
+    repeated string friendsIds = 1;
+    repeated string errors = 2;
+    bool success = 3;
+}

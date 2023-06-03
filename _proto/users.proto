@@ -21,6 +21,8 @@ message LoginInput {
 message RegisterInput {
   string email = 1;
   string password = 2;
+  string fristName = 3;
+  string lastName = 4;
 }
 
 message LoginResponse {
